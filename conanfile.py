@@ -25,10 +25,9 @@ class BrokkrRecipe (ConanFile):
         self.info.clear()
 
     def set_version (self):
-        # git = LegacyGit(self.recipe_folder)
-        # tag = git.run('describe --tags')
-        # self.version = tag[1:]
-        self.version = '0.0.1'
+        git = LegacyGit(self.recipe_folder)
+        tag = git.run('describe --tags')
+        self.version = tag[1:]
 
     def export (self):
         git = Git(self, self.recipe_folder)
