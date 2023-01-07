@@ -6,4 +6,9 @@ include(./cmake/brokkr/versioning.cmake)
 project(brokkr VERSION 1.2)
 brokkr_project_version_from_git()
 
-brokkr_package(CONFIG_TEMPLATE cmake/templates/config.cmake.in)
+brokkr_package(
+    CONFIG_TEMPLATE cmake/templates/config.cmake.in
+    EXTRA_CONFIG
+        cmake/brokkr/package.cmake
+        cmake/brokkr/versioning.cmake
+)
