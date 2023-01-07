@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+from pathlib import Path
+
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import update_conandata
@@ -56,3 +58,7 @@ class BrokkrRecipe (ConanFile):
     def package (self):
         cmake = CMake(self)
         cmake.install()
+
+    def package_info (self):
+        self.cpp_info.set_property('cmake_find_mode', 'none')
+        self.cpp_info.builddirs.append(Path('lib', 'cmake', 'brokkr'))
