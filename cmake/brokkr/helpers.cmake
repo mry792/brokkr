@@ -78,3 +78,32 @@ function(brokkr_ensure_found)
         set(${BKR_ENSF_OUTPUT_PACKAGES} ${packages} PARENT_SCOPE)
     endif()
 endfunction()
+
+
+function(_bkr_get_proj_prop OUTPUT_VARIABLE PROPERTY_NAME)
+    get_property(
+        project_dependencies
+        GLOBAL
+        PROPERTY "brokkr_${PROJECT_NAME}_${PROPERTY_NAME}"
+    )
+    set(
+        ${OUTPUT_VARIABLE}
+        ${project_dependencies}
+        PARENT_SCOPE
+    )
+endfunction()
+
+
+function(_bkr_append_proj_prop PROPERTY_NAME)
+    _bkr_get_proj_prop(dependencies ${PROPERTY_NAME})
+
+    list(APPEND dependencies ${ARGN})
+    list(SORT dependencies)
+    list(REMOVE_DUPLICATES dependencies)
+
+    set_property(
+        GLOBAL
+        PROPERTY "brokkr_${PROJECT_NAME}_${PROPERTY_NAME}"
+        ${dependencies}
+    )
+endfunction()
