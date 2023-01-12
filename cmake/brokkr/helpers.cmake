@@ -107,3 +107,34 @@ function(_bkr_append_proj_prop PROPERTY_NAME)
         ${dependencies}
     )
 endfunction()
+
+
+# Log the target as "ready to install." It will not actually be installed
+# until a later call to `brokkr_package()`.
+#
+# :param TARGET_NAME: Name of the target to install.
+# :type TARGET_NAME: String.
+# :param REQUIRED_PACKAGES: Package dependencies of the target to install.
+# :type REQUIRED_PACKAGES: List of strings.
+function(brokkr_install_target TARGET_NAME)
+    cmake_parse_arguments(
+        PARSE_ARGV 1
+        BKR_ITGT
+        ""
+        ""
+        "REQUIRED_PACKAGES"
+    )
+
+    if(NOT TARGET "${TARGET_NAME}")
+        message(
+            FATAL_ERROR
+            "\"${TARGET_NAME}\" does not name a target. Cannot add it to the "
+            "export set."
+        )
+    endif()
+
+    _bkr_append_proj_prop("targets" "${TARGET_NAME}")
+    if(BKR_ITGT_REQUIRED_PACKAGES)
+        _bkr_append_proj_prop("dependencies" ${BKR_ITGT_REQUIRED_PACKAGES})
+    endif()
+endfunction()
