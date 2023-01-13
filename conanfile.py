@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+from pathlib import Path
+
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import update_conandata
@@ -25,10 +27,9 @@ class BrokkrRecipe (ConanFile):
         self.info.clear()
 
     def set_version (self):
-        # git = LegacyGit(self.recipe_folder)
-        # tag = git.run('describe --tags')
-        # self.version = tag[1:]
-        self.version = '0.0.1'
+        git = LegacyGit(self.recipe_folder)
+        tag = git.run('describe --tags')
+        self.version = tag[1:]
 
     def export (self):
         git = Git(self, self.recipe_folder)
@@ -57,3 +58,7 @@ class BrokkrRecipe (ConanFile):
     def package (self):
         cmake = CMake(self)
         cmake.install()
+
+    def package_info (self):
+        self.cpp_info.set_property('cmake_find_mode', 'none')
+        self.cpp_info.builddirs.append(Path('lib', 'cmake', 'brokkr'))

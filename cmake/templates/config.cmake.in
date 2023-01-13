@@ -1,1 +1,12 @@
 @PACKAGE_INIT@
+
+
+###
+# Extra config.
+###
+
+set(_extra_config @BROKKR_EXTRA_CONFIG@)
+
+foreach(extra IN LISTS _extra_config)
+    include(${CMAKE_CURRENT_LIST_DIR}/${extra})
+endforeach()
