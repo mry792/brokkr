@@ -14,10 +14,10 @@ endforeach()
 
 
 ###
-# Extra config.
+# Load config files.
 ###
 
-set(_extra_config @BROKKR_EXTRA_CONFIG@)
+set(_extra_config @BROKKR_CONFIG_FILES@)
 
 foreach(extra IN LISTS _extra_config)
     include(${CMAKE_CURRENT_LIST_DIR}/${extra})

@@ -36,6 +36,25 @@ function(_bkr_generate_extra_config OUTPUT_FILENAMES OUTPUT_TO_INSTALL)
 endfunction()
 
 
+function(_bkr_generate_targets_file OUTPUT_FILENAME)
+    _bkr_get_proj_prop(targets "targets")
+    if(targets)
+        install(
+            TARGETS ${targets}
+            EXPORT ${PROJECT_NAME}-targets
+            FILE_SET HEADERS
+        )
+        install(
+            EXPORT ${PROJECT_NAME}-targets
+            FILE "${PROJECT_NAME}-targets.cmake"
+            NAMESPACE "${PROJECT_NAME}::"
+            DESTINATION lib/cmake/${PROJECT_NAME}
+        )
+        set(OUTPUT_FILENAME "${PROJECT_NAME}-targets.cmake" PARENT_SCOPE)
+    endif()
+endfunction()
+
+
 # Generate and install the files necessary for other CMake projects to consume
 # this one from its install location through `find_package`.
 #
@@ -79,10 +98,14 @@ function(brokkr_package)
 
     # Generate extra files.
     _bkr_generate_extra_config(
-        BROKKR_EXTRA_CONFIG
+        BROKKR_CONFIG_FILES
         extra_config_to_install
         ${BKR_PKG_EXTRA_CONFIG}
     )
+
+    # Generate targets file.
+    _bkr_generate_targets_file(targets_file)
+    list(PREPEND BROKKR_CONFIG_FILES "${targets_file}")
 
     # Generate main config file.
     _bkr_get_proj_prop(BROKKR_PROJECT_DEPENDENCIES "dependencies")
