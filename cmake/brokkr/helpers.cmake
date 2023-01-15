@@ -1,9 +1,9 @@
 
 macro(_bkr_set_with_default OUTPUT_VAR VALUE DEFAULT)
-    if("${VALUE}")
-        set(${OUTPUT_VAR} "${VALUE}")
-    else()
+    if("${VALUE}" STREQUAL "")
         set(${OUTPUT_VAR} "${DEFAULT}")
+    else()
+        set(${OUTPUT_VAR} "${VALUE}")
     endif()
 endmacro()
 
