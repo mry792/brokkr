@@ -2,6 +2,18 @@
 
 
 ###
+# Dependencies.
+###
+
+set(_dependencies @BROKKR_PROJECT_DEPENDENCIES@)
+include(CMakeFindDependencyMacro)
+
+foreach(dep IN LISTS _dependencies)
+    find_dependency(${dep} REQUIRED)
+endforeach()
+
+
+###
 # Extra config.
 ###
 

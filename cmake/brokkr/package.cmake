@@ -85,6 +85,7 @@ function(brokkr_package)
     )
 
     # Generate main config file.
+    _bkr_get_proj_prop(BROKKR_PROJECT_DEPENDENCIES "dependencies")
     set(main_config_file "brokkr/${PROJECT_NAME}-config.cmake")
     configure_package_config_file(
         ${BKR_PKG_CONFIG_TEMPLATE}
