@@ -11,6 +11,7 @@ brokkr_package(
     EXTRA_CONFIG
         cmake/brokkr/executable.cmake
         cmake/brokkr/helpers.cmake
+        cmake/brokkr/library.cmake
         cmake/brokkr/package.cmake
         cmake/brokkr/versioning.cmake
 )
