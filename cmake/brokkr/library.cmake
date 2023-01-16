@@ -99,6 +99,8 @@ endfunction()
 #
 # :param LIB_NAME: Name of the library under test.
 # :type LIB_NAME: Target name.
+# :param DISCOVER_INCLUDE: Script which provides the DISCOVER_COMMAND.
+# :type DISCOVER_INCLUDE: Name of or path to a CMake script. (optional)
 # :param DISCOVER_COMMAND: CMake command used to register the tests with CTest.
 # :type DISCOVER_COMMAND: Command name. (optional)
 # :param SOURCES: Source files to compile into the test executable.
@@ -119,7 +121,7 @@ function(brokkr_add_library_unit_tests LIB_NAME)
                 PARSE_ARGV 1
                 BKR_ADD_LIB_UT
                 ""
-                "DISCOVER_COMMAND"
+                "DISCOVER_INCLUDE;DISCOVER_COMMAND"
                 "SOURCES;DEPENDENCIES;DISCOVER_EXTRA_ARGS"
             )
 
@@ -154,6 +156,7 @@ function(brokkr_add_library_unit_tests LIB_NAME)
                 )
 
                 if(BKR_ADD_LIB_UT_DISCOVER_COMMAND)
+                    include(${BKR_ADD_LIB_UT_DISCOVER_INCLUDE})
                     cmake_language(
                         CALL
                         ${BKR_ADD_LIB_UT_DISCOVER_COMMAND}
@@ -228,6 +231,10 @@ endfunction()
 # :type LIBRARY COMPILE_FEATURES: List of strings.
 # :param LIBRARY COMPILE_OPTIONS: Extra flags to pass to the compilation step.
 # :type LIBRARY COMPILE_OPTIONS: List of string values.
+# :param UNIT_TESTS DISCOVER_INCLUDE: Script which provides the
+#     DISCOVER_COMMAND.
+# :type UNIT_TESTS DISCOVER_INCLUDE: Name of or path to a CMake script.
+#     (optional)
 # :param UNIT_TESTS DEPENDENCIES: Targets to link the test executable to.
 # :type UNIT_TESTS DEPENDENCIES: List of target names.
 # :param UNIT_TESTS DISCOVER_COMMAND: CMake command used to register the tests
