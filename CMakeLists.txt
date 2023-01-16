@@ -9,8 +9,15 @@ brokkr_project_version_from_git()
 brokkr_package(
     CONFIG_TEMPLATE cmake/templates/config.cmake.in
     EXTRA_CONFIG
+        cmake/brokkr/dirs.cmake
         cmake/brokkr/executable.cmake
         cmake/brokkr/helpers.cmake
+        cmake/brokkr/library.cmake
         cmake/brokkr/package.cmake
         cmake/brokkr/versioning.cmake
+)
+
+install(
+    FILES cmake/templates/config.cmake.in
+    DESTINATION lib/cmake/brokkr/templates
 )

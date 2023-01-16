@@ -65,7 +65,7 @@ endfunction()
 # :param CONFIG_TEMPLATE: File to use as the the CMake configure template for
 #     the package config file.
 # :type CONFIG_TEMPLATE: Path to a file, relative to the current lists file
-#     or absolute.
+#     or absolute. (optional)
 # :param EXTRA_CONFIG: Extra files to be installed and loaded when the package
 #     is imported. Files with a ".cmake.in" extension will be run through
 #     `confgure_file(@ONLY)` before being installed.
@@ -86,6 +86,13 @@ function(brokkr_package)
             "${BKR_PKG_UNPARSED_ARGUMENTS}"
         )
     endif()
+
+    # Set defaults.
+    _bkr_set_with_default(
+        config_template
+        "${BKR_PKG_CONFIG_TEMPLATE}"
+        "${brokkr_CMAKE_DIR}/brokkr/templates/config.cmake.in"
+    )
 
     include(CMakePackageConfigHelpers)
 
@@ -111,7 +118,7 @@ function(brokkr_package)
     _bkr_get_proj_prop(BROKKR_PROJECT_DEPENDENCIES "dependencies")
     set(main_config_file "brokkr/${PROJECT_NAME}-config.cmake")
     configure_package_config_file(
-        ${BKR_PKG_CONFIG_TEMPLATE}
+        ${config_template}
         ${main_config_file}
         INSTALL_DESTINATION lib/cmake/${PROJECT_NAME}
     )

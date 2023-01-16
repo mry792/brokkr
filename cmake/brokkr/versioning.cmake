@@ -1,13 +1,4 @@
 
-macro(_bkr_set_with_default OUTPUT_VAR VALUE DEFAULT)
-    if("${VALUE}")
-        set(${OUTPUT_VAR} "${VALUE}")
-    else()
-        set(${OUTPUT_VAR} "${DEFAULT}")
-    endif()
-endmacro()
-
-
 # Derive a version suitable for CMake from a recent git tag.
 #
 # This expects the recent git tag to be of the form "vX[.Y[.Z]]". If the most

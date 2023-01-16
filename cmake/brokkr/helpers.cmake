@@ -1,4 +1,13 @@
 
+macro(_bkr_set_with_default OUTPUT_VAR VALUE DEFAULT)
+    if("${VALUE}" STREQUAL "")
+        set(${OUTPUT_VAR} "${DEFAULT}")
+    else()
+        set(${OUTPUT_VAR} "${VALUE}")
+    endif()
+endmacro()
+
+
 function(_bkr_package_names_from_targets OUTPUT_PACKAGES OUTPUT_LOOSE)
     set(package_names)
     set(loose_names)
