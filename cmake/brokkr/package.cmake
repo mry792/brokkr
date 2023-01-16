@@ -10,6 +10,8 @@ function(_bkr_generate_extra_config OUTPUT_FILENAMES OUTPUT_TO_INSTALL)
             cmake_path(GET extra FILENAME template_filename)
             string(REGEX REPLACE "\\.cmake\\.in$" ".brokkr-gen.cmake" extra_filename ${template_filename})
             set(extra_generated "${CMAKE_CURRENT_BINARY_DIR}/brokkr/${extra_filename}")
+
+            message(STATUS "[brokkr] generating file: ${extra} => ${extra_filename}")
             configure_file(${extra} ${extra_generated} @ONLY)
 
             list(APPEND filenames ${extra_filename})
@@ -39,6 +41,7 @@ endfunction()
 function(_bkr_generate_targets_file OUTPUT_FILENAME)
     _bkr_get_proj_prop(targets "targets")
     if(targets)
+        message(STATUS "[brokkr] Generating targets file for targets \"${targets}\".")
         install(
             TARGETS ${targets}
             EXPORT ${PROJECT_NAME}-targets
@@ -51,6 +54,8 @@ function(_bkr_generate_targets_file OUTPUT_FILENAME)
             DESTINATION lib/cmake/${PROJECT_NAME}
         )
         set(OUTPUT_FILENAME "${PROJECT_NAME}-targets.cmake" PARENT_SCOPE)
+    else()
+        message(STATUS "[brokkr] No targets found. Skipping generation of targets file.")
     endif()
 endfunction()
 
