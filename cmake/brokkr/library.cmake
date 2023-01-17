@@ -34,12 +34,6 @@ function(brokkr_add_library LIB_NAME)
         "HEADERS;SOURCES;DEPENDENCIES;COMPILE_FEATURES"
     )
 
-    cmake_path(
-        ABSOLUTE_PATH BKR_ADD_LIB_INCLUDE_DIR
-        NORMALIZE
-        OUTPUT_VARIABLE inc_dir
-    )
-
     if(${BKR_ADD_LIB_SOURCES})
         add_library(${LIB_NAME})
         set(scope PUBLIC)
@@ -61,7 +55,7 @@ function(brokkr_add_library LIB_NAME)
     target_include_directories(
         ${LIB_NAME}
         ${scope}
-            $<BUILD_INTERFACE:${inc_dir}>
+            $<BUILD_INTERFACE:${BKR_ADD_LIB_INCLUDE_DIR}>
             $<INSTALL_INTERFACE:include>
     )
     target_link_libraries(
