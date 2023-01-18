@@ -25,15 +25,13 @@ cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
 # :type DEPENDENCIES: List of target names.
 # :param COMPILE_FEATURES: Compile features to configure the target.
 # :type COMPILE_FEATURES: List of string values.
-# :param COMPILE_OPTIONS: Extra flags to pass to the compilation step.
-# :type COMPILE_OPTIONS: List of string values.
 function(brokkr_add_library LIB_NAME)
     cmake_parse_arguments(
         PARSE_ARGV 1
         BKR_ADD_LIB
         ""
         "INCLUDE_DIR"
-        "HEADERS;SOURCES;DEPENDENCIES;COMPILE_FEATURES;COMPILE_OPTIONS"
+        "HEADERS;SOURCES;DEPENDENCIES;COMPILE_FEATURES"
     )
 
     cmake_path(
@@ -45,12 +43,6 @@ function(brokkr_add_library LIB_NAME)
     if(${BKR_ADD_LIB_SOURCES})
         add_library(${LIB_NAME})
         set(scope PUBLIC)
-
-        # NOTE: Only add compile options to source compiled for the library.
-        target_compile_options(
-            ${LIB_NAME}
-            PRIVATE ${BKR_ADD_LIB_COMPILE_OPTIONS}
-        )
     else()
         add_library(${LIB_NAME} INTERFACE)
         set(scope INTERFACE)
@@ -229,8 +221,6 @@ endfunction()
 # :type LIBRARY DEPENDENCIES: List of target names.
 # :param LIBRARY COMPILE_FEATURES: Compile features to configure the library.
 # :type LIBRARY COMPILE_FEATURES: List of strings.
-# :param LIBRARY COMPILE_OPTIONS: Extra flags to pass to the compilation step.
-# :type LIBRARY COMPILE_OPTIONS: List of string values.
 # :param UNIT_TESTS DISCOVER_INCLUDE: Script which provides the
 #     DISCOVER_COMMAND.
 # :type UNIT_TESTS DISCOVER_INCLUDE: Name of or path to a CMake script.
@@ -258,7 +248,7 @@ function(brokkr_library LIB_NAME)
         BKR_LIB_DETAILS
         ""
         "INCLUDE_DIR"
-        "HEADERS;SOURCES;DEPENDENCIES;COMPILE_FEATURES;COMPILE_OPTIONS"
+        "HEADERS;SOURCES;DEPENDENCIES;COMPILE_FEATURES"
         ${BKR_LIB_LIBRARY}
     )
 
@@ -295,11 +285,6 @@ function(brokkr_library LIB_NAME)
         INCLUDE_DIR ${inc_dir}
         HEADERS ${header_files}
         SOURCES ${source_files}
-        COMPILE_OPTIONS
-            -Werror
-            -Wall
-            -Wextra
-            -Wpedantic
         ${BKR_LIB_LIBRARY}
     )
 
@@ -310,11 +295,6 @@ function(brokkr_library LIB_NAME)
     brokkr_add_library_unit_tests(
         "${LIB_NAME}"
         SOURCES ${utest_files}
-        COMPILE_OPTIONS
-            -Werror
-            -Wall
-            -Wextra
-            -Wpedantic
         ${BKR_LIB_UNIT_TESTS}
     )
 
