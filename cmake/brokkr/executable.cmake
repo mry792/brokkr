@@ -18,21 +18,18 @@
 # :type DEPENDENCIES: List of target names.
 # :param COMPILE_FEATURES: Compile features to configure the target.
 # :type COMPILE_FEATURES: List of string values.
-# :param COMPILE_OPTIONS: Extra flags to pass to the compilation step.
-# :type COMPILE_OPTIONS: List of string values.
 function(brokkr_add_executable EXEC_NAME)
     cmake_parse_arguments(
         PARSE_ARGV 1
         BKR_ADD_EXEC
         ""
         ""
-        "SOURCES;DEPENDENCIES;COMPILE_FEATURES;COMPILE_OPTIONS"
+        "SOURCES;DEPENDENCIES;COMPILE_FEATURES"
     )
 
     add_executable(${EXEC_NAME} ${BKR_ADD_EXEC_SOURCES})
     target_link_libraries(${EXEC_NAME} PUBLIC ${BKR_ADD_EXEC_DEPENDENCIES})
     target_compile_features(${EXEC_NAME} PUBLIC ${BKR_ADD_EXEC_COMPILE_FEATURES})
-    target_compile_options(${EXEC_NAME} PRIVATE ${BKR_ADD_EXEC_COMPILE_OPTIONS})
 
     add_executable(${PROJECT_NAME}::${EXEC_NAME} ALIAS ${EXEC_NAME})
 endfunction()
@@ -87,11 +84,6 @@ function(brokkr_executable EXEC_NAME)
         ${EXEC_NAME}
         SOURCES "${BKR_EXEC_MAIN_SOURCE}"
         DEPENDENCIES ${BKR_EXEC_DEPENDENCIES}
-        COMPILE_OPTIONS
-            -Werror
-            -Wall
-            -Wextra
-            -Wpedantic
     )
 
     # Static analysis????
