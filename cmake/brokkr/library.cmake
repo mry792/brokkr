@@ -13,6 +13,10 @@ cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
 # matches the name the target will take on when referenced in other
 # packages.
 #
+# All properties, except for compiled source files, will be assumed to be
+# PUBLIC by default, or INTERFACE if the library is determined to be
+# header-only.
+#
 # :param LIB_NAME: Name of the target.
 # :type LIB_NAME: A string which is a valid file name.
 # :param INCLUDE_DIR: Base directory for header files.
@@ -281,9 +285,6 @@ function(brokkr_library LIB_NAME)
         SOURCES ${source_files}
         ${BKR_LIB_LIBRARY}
     )
-
-    # Static analysis????
-    # TODO
 
     # Add unit tests.
     brokkr_add_library_unit_tests(
