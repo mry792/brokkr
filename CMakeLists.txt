@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
-project(brokkr)
+project(brokkr LANGUAGES)
 
 include(./cmake/brokkr/helpers.cmake)
 include(./cmake/brokkr/package.cmake)
