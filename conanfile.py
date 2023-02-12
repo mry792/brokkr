@@ -21,7 +21,7 @@ class BrokkrRecipe (ConanFile):
     )
 
     settings = 'build_type',
-    generators = 'virtualenv', 'CMakeToolchain'
+    generators = 'CMakeToolchain'
 
     def package_id (self):
         self.info.clear()
