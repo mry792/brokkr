@@ -80,6 +80,26 @@ function(brokkr_add_library LIB_NAME)
 endfunction()
 
 
+# Generate empty source file if needed.
+function(_bkr_ensure_src OUTPUT_VARIABLE)
+    if(NOT ARGN)
+        message(
+            WARNING
+            "No unit test sources found for unit test executable "
+            "\"${ut_exec_name}\" of library \"${LIB_NAME}\". "
+            "Generating unit test executable only from linked "
+            "dependencies."
+        )
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/brokkr_empty.cpp "")
+        set(
+            ${OUTPUT_VARIABLE}
+            ${CMAKE_CURRENT_BINARY_DIR}/brokkr_empty.cpp
+            PARENT_SCOPE
+        )
+    endif()
+endfunction()
+
+
 # Create an executable target for a library's unit tests.
 #
 # This is a lower-level implementation helper function. The function
@@ -124,21 +144,7 @@ function(brokkr_add_library_unit_tests LIB_NAME)
 
     if(BKR_ADD_LIB_UT_SOURCES OR BKR_ADD_LIB_UT_DEPENDENCIES)
         # Generate empty source file if needed.
-        if(NOT BKR_ADD_LIB_UT_SOURCES)
-            message(
-                WARNING
-                "No unit test sources found for unit test executable "
-                "\"${ut_exec_name}\" of library \"${LIB_NAME}\". "
-                "Generating unit test executable only from linked "
-                "dependencies."
-            )
-            file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/brokkr_empty.cpp "")
-            list(
-                APPEND
-                BKR_ADD_LIB_UT_SOURCES
-                ${CMAKE_CURRENT_BINARY_DIR}/brokkr_empty.cpp
-            )
-        endif()
+        _bkr_ensure_src("BKR_ADD_LIB_UT_SOURCES" ${BKR_ADD_LIB_UT_SOURCES})
 
         brokkr_ensure_found(TARGETS ${BKR_ADD_LIB_UT_DEPENDENCIES})
         brokkr_add_executable(
