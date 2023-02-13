@@ -187,14 +187,14 @@ endfunction()
 
 # Create a library and flag it for installation.
 #
-# The library is assumed to be contained in a single directory in the current
-# source directory and named "lib-{LIB_NAME}". The source code should follow
-# the "unified source layout" with a single folder under the library root
-# called "src" containing the mixed source, header, and unit test files. The
-# root should also contain a directory called "tests" containing integration
-# test source files. Overall, the directory structure should look like this:
+# The library is assumed to be fully contained in a single directory, by
+# default the current directory. The source code should follow the "unified
+# source layout" with a single folder under the library root called "src"
+# containing the mixed source, header, and unit test files. The root should
+# also contain a directory called "tests" containing integration test source
+# files. Overall, the directory structure should look like this:
 #
-#   lib-my-library
+#   .
 #   ├── src
 #   │   └── my-library
 #   │       ├── component_a.hpp
@@ -280,11 +280,7 @@ function(brokkr_library LIB_NAME)
     )
 
     # Set defaults.
-    _bkr_set_with_default(
-        lib_root
-        "${BKR_LIB_ROOT_DIRECTORY}"
-        "lib-${LIB_NAME}"
-    )
+    _bkr_set_with_default(lib_root "${BKR_LIB_ROOT_DIRECTORY}" ".")
     get_filename_component(lib_root "${lib_root}" ABSOLUTE)
     set(src_dir "${lib_root}/src")
     set(inc_dir "${src_dir}")
