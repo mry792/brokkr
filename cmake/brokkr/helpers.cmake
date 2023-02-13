@@ -79,6 +79,7 @@ function(brokkr_ensure_found)
     list(REMOVE_ITEM packages ${PACKAGE_NAME})
 
     foreach(package_name IN LISTS packages)
+        message(STATUS "[brokkr] Importing package \"${package_name}\".")
         # Do we need "GLOBAL"? (https://cmake.org/cmake/help/latest/command/find_package.html)
         find_package("${package_name}" REQUIRED)
     endforeach()

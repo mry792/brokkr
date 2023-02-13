@@ -21,7 +21,7 @@ class BrokkrRecipe (ConanFile):
     )
 
     settings = 'build_type',
-    generators = 'virtualenv', 'CMakeToolchain'
+    generators = 'CMakeToolchain'
 
     def package_id (self):
         self.info.clear()
@@ -61,4 +61,4 @@ class BrokkrRecipe (ConanFile):
 
     def package_info (self):
         self.cpp_info.set_property('cmake_find_mode', 'none')
-        self.cpp_info.builddirs.append(Path('lib', 'cmake', 'brokkr'))
+        self.cpp_info.builddirs.append(str(Path('lib', 'cmake', 'brokkr')))
