@@ -80,6 +80,26 @@ function(brokkr_add_library LIB_NAME)
 endfunction()
 
 
+# Generate empty source file if needed.
+function(_bkr_ensure_src OUTPUT_VARIABLE)
+    if(NOT ARGN)
+        message(
+            WARNING
+            "No unit test sources found for unit test executable "
+            "\"${ut_exec_name}\" of library \"${LIB_NAME}\". "
+            "Generating unit test executable only from linked "
+            "dependencies."
+        )
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/brokkr_empty.cpp "")
+        set(
+            ${OUTPUT_VARIABLE}
+            ${CMAKE_CURRENT_BINARY_DIR}/brokkr_empty.cpp
+            PARENT_SCOPE
+        )
+    endif()
+endfunction()
+
+
 # Create an executable target for a library's unit tests.
 #
 # This is a lower-level implementation helper function. The function
@@ -103,58 +123,47 @@ endfunction()
 # All unparsed arguments will be forwarded to the `brokkr_add_executable`
 # command that creates the unit test executable target.
 function(brokkr_add_library_unit_tests LIB_NAME)
-    if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-        include(CTest)
+    if(NOT CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+        return()
+    endif()
 
-        if(BUILD_TESTING)
-            cmake_parse_arguments(
-                PARSE_ARGV 1
-                BKR_ADD_LIB_UT
-                ""
-                "DISCOVER_INCLUDE;DISCOVER_COMMAND"
-                "SOURCES;DEPENDENCIES;DISCOVER_EXTRA_ARGS"
+    include(CTest)
+    if(NOT BUILD_TESTING)
+        return()
+    endif()
+
+    cmake_parse_arguments(
+        PARSE_ARGV 1
+        BKR_ADD_LIB_UT
+        ""
+        "DISCOVER_INCLUDE;DISCOVER_COMMAND"
+        "SOURCES;DEPENDENCIES;DISCOVER_EXTRA_ARGS"
+    )
+
+    set(ut_exec_name "${LIB_NAME}_unit-tests")
+
+    if(BKR_ADD_LIB_UT_SOURCES OR BKR_ADD_LIB_UT_DEPENDENCIES)
+        # Generate empty source file if needed.
+        _bkr_ensure_src("BKR_ADD_LIB_UT_SOURCES" ${BKR_ADD_LIB_UT_SOURCES})
+
+        brokkr_ensure_found(TARGETS ${BKR_ADD_LIB_UT_DEPENDENCIES})
+        brokkr_add_executable(
+            "${ut_exec_name}"
+            SOURCES ${BKR_ADD_LIB_UT_SOURCES}
+            DEPENDENCIES
+                ${LIB_NAME}
+                ${BKR_ADD_LIB_UT_DEPENDENCIES}
+            ${BKR_ADD_LIB_UT_UNPARSED_ARGUMENTS}
+        )
+
+        if(BKR_ADD_LIB_UT_DISCOVER_COMMAND)
+            include(${BKR_ADD_LIB_UT_DISCOVER_INCLUDE})
+            cmake_language(
+                CALL
+                ${BKR_ADD_LIB_UT_DISCOVER_COMMAND}
+                ${ut_exec_name}
+                ${BKR_ADD_LIB_UT_DISCOVER_EXTRA_ARGS}
             )
-
-            set(ut_exec_name "${LIB_NAME}_unit-tests")
-
-            if(BKR_ADD_LIB_UT_SOURCES OR BKR_ADD_LIB_UT_DEPENDENCIES)
-                # Generate empty source file if needed.
-                if(NOT BKR_ADD_LIB_UT_SOURCES)
-                    message(
-                        WARNING
-                        "No unit test sources found for unit test executable "
-                        "\"${ut_exec_name}\" of library \"${LIB_NAME}\". "
-                        "Generating unit test executable only from linked "
-                        "dependencies."
-                    )
-                    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/brokkr_empty.cpp "")
-                    list(
-                        APPEND
-                        BKR_ADD_LIB_UT_SOURCES
-                        ${CMAKE_CURRENT_BINARY_DIR}/brokkr_empty.cpp
-                    )
-                endif()
-
-                brokkr_ensure_found(TARGETS ${BKR_ADD_LIB_UT_DEPENDENCIES})
-                brokkr_add_executable(
-                    "${ut_exec_name}"
-                    SOURCES ${BKR_ADD_LIB_UT_SOURCES}
-                    DEPENDENCIES
-                        ${LIB_NAME}
-                        ${BKR_ADD_LIB_UT_DEPENDENCIES}
-                    ${BKR_ADD_LIB_UT_UNPARSED_ARGUMENTS}
-                )
-
-                if(BKR_ADD_LIB_UT_DISCOVER_COMMAND)
-                    include(${BKR_ADD_LIB_UT_DISCOVER_INCLUDE})
-                    cmake_language(
-                        CALL
-                        ${BKR_ADD_LIB_UT_DISCOVER_COMMAND}
-                        ${ut_exec_name}
-                        ${BKR_ADD_LIB_UT_DISCOVER_EXTRA_ARGS}
-                    )
-                endif()
-            endif()
         endif()
     endif()
 endfunction()
