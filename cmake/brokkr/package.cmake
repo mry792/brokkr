@@ -71,6 +71,10 @@ endfunction()
 #     the package config file.
 # :type CONFIG_TEMPLATE: Path to a file, relative to the current lists file
 #     or absolute. (optional)
+# :param COMPATIBILITY: The compatibility mode to forward to the
+#     `write_basic_package_version_file` function. (default: "SameMajorVersion")
+# :type COMPATIBILITY: One of "AnyNewerVersion", "SameMajorVersion",
+#     "SameMinorVersion", or "ExactVersion".
 # :param EXTRA_CONFIG: Extra files to be installed and loaded when the package
 #     is imported. Files with a ".cmake.in" extension will be run through
 #     `confgure_file(@ONLY)` before being installed.
@@ -81,7 +85,7 @@ function(brokkr_package)
         PARSE_ARGV 0
         BKR_PKG
         ""
-        "CONFIG_TEMPLATE"
+        "CONFIG_TEMPLATE;COMPATIBILITY"
         "EXTRA_CONFIG"
     )
     if(BKR_PKG_UNPARSED_ARGUMENTS)
@@ -98,6 +102,11 @@ function(brokkr_package)
         "${BKR_PKG_CONFIG_TEMPLATE}"
         "${brokkr_CMAKE_DIR}/brokkr/templates/config.cmake.in"
     )
+    _bkr_set_with_default(
+        compatibility
+        "${BKR_PKG_COMPATIBILITY}"
+        SameMajorVersion
+    )
 
     include(CMakePackageConfigHelpers)
 
@@ -105,7 +114,7 @@ function(brokkr_package)
     set(version_file "brokkr/${PROJECT_NAME}-config-version.cmake")
     write_basic_package_version_file(
         ${version_file}
-        COMPATIBILITY SameMajorVersion
+        COMPATIBILITY ${compatibility}
     )
 
     # Generate extra files.
