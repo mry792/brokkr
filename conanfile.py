@@ -6,7 +6,6 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import update_conandata
 from conan.tools.scm import Git
-from conans.tools import Git as LegacyGit
 
 
 class BrokkrRecipe (ConanFile):
@@ -23,17 +22,19 @@ class BrokkrRecipe (ConanFile):
     settings = 'build_type',
     generators = 'CMakeToolchain'
 
+    @property
+    def git (self):
+        return Git(self, self.recipe_folder)
+
     def package_id (self):
         self.info.clear()
 
     def set_version (self):
-        git = LegacyGit(self.recipe_folder)
-        tag = git.run('describe --tags')
+        tag = self.git.run('describe --tags')
         self.version = tag[1:]
 
     def export (self):
-        git = Git(self, self.recipe_folder)
-        scm_url, scm_commit = git.get_url_and_commit()
+        scm_url, scm_commit = self.git.get_url_and_commit()
         update_conandata(self, {
             'source': {
                 'commit': scm_commit,
