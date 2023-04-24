@@ -92,29 +92,29 @@ endfunction()
 
 function(_bkr_get_proj_prop OUTPUT_VARIABLE PROPERTY_NAME)
     get_property(
-        project_dependencies
+        property_value
         GLOBAL
         PROPERTY "brokkr_${PROJECT_NAME}_${PROPERTY_NAME}"
     )
     set(
         ${OUTPUT_VARIABLE}
-        ${project_dependencies}
+        ${property_value}
         PARENT_SCOPE
     )
 endfunction()
 
 
 function(_bkr_append_proj_prop PROPERTY_NAME)
-    _bkr_get_proj_prop(dependencies ${PROPERTY_NAME})
+    _bkr_get_proj_prop(property_value ${PROPERTY_NAME})
 
-    list(APPEND dependencies ${ARGN})
-    list(SORT dependencies)
-    list(REMOVE_DUPLICATES dependencies)
+    list(APPEND property_value ${ARGN})
+    list(SORT property_value)
+    list(REMOVE_DUPLICATES property_value)
 
     set_property(
         GLOBAL
         PROPERTY "brokkr_${PROJECT_NAME}_${PROPERTY_NAME}"
-        ${dependencies}
+        ${property_value}
     )
 endfunction()
 
