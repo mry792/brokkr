@@ -1,10 +1,11 @@
 #! /usr/bin/env python3
 
 from pathlib import Path
+from textwrap import dedent
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.files import update_conandata
+from conan.tools.files import save, update_conandata
 from conan.tools.scm import Git
 
 
@@ -56,10 +57,34 @@ class BrokkrRecipe (ConanFile):
         cmake.configure()
         cmake.build()
 
+    @property
+    def _toolchain_file (self):
+        return Path('lib', 'cmake', self.name, 'dependent-toolchain.cmake')
+
     def package (self):
         cmake = CMake(self)
         cmake.install()
 
+        # Brokkr provides it's own CMake config file. To make sure dependent
+        # packages can find it, we generate a custom toolchain to be used by
+        # dependent recipes that defines `brokkr_ROOT`.
+        # https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure
+        save(
+            self,
+            self.package_folder / self._toolchain_file,
+            dedent(
+                '''
+                include_guard()
+                message(STATUS "[brokkr] Using brokkr dependent-toolchain: ${CMAKE_CURRENT_LIST_FILE}")
+                set(brokkr_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../..)
+                cmake_path(NORMAL_PATH brokkr_ROOT)
+                '''
+            ),
+        )
+
     def package_info (self):
         self.cpp_info.set_property('cmake_find_mode', 'none')
-        self.cpp_info.builddirs.append(str(Path('lib', 'cmake', 'brokkr')))
+        self.conf_info.append(
+            'tools.cmake.cmaketoolchain:user_toolchain',
+            str(self.package_folder / self._toolchain_file),
+        )
