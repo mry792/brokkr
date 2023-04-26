@@ -13,12 +13,19 @@ function(_bkr_package_names_from_targets OUTPUT_PACKAGES OUTPUT_LOOSE)
     set(loose_names)
 
     foreach(target_name IN LISTS ARGN)
-        string(FIND "${target_name}" "::" ns_position)
-        if("${ns_position}" EQUAL "-1")
+        string(REPLACE "::" ";" tokens ${target_name})
+        list(LENGTH tokens num_tokens)
+        if(num_tokens EQUAL 1)
             list(APPEND loose_names ${target_name})
+        elseif(num_tokens EQUAL 2)
+            list(GET tokens 0 pkg_name)
+            list(APPEND package_names ${pkg_name})
         else()
-            string(SUBSTRING "${target_name}" 0 ${ns_position} package_name)
-            list(APPEND package_names "${package_name}")
+            message(
+                FATAL_ERROR
+                "[brokkr] Cannot parse qualified target \"${target_name}\". "
+                "Too many namespace tokens."
+            )
         endif()
     endforeach()
 
