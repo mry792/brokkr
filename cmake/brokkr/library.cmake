@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
 
 # Create a binary library target and populate it with all the specified
@@ -100,6 +100,34 @@ function(_bkr_ensure_src OUTPUT_VARIABLE LIB_NAME UT_EXEC_NAME)
 endfunction()
 
 
+# Resolves UT profiles by name.
+function(_bkr_resolve_ut_profile LIB_NAME)
+    cmake_parse_arguments(
+        PARSE_ARGV 1
+        BKR_RUTP
+        ""
+        "PROFILE;DISCOVER_INCLUDE;DISCOVER_COMMAND"
+        "DEPENDENCIES"
+    )
+
+    if(NOT BKR_RUTP_PROFILE)
+        message(VERBOSE "[brokkr] No profile selected for target '${LIB_NAME}'.")
+        set(discover_include ${BKR_RUTP_DISCOVER_INCLUDE})
+        set(discover_command ${BKR_RUTP_DISCOVER_COMMAND})
+        set(dependencies ${BKR_RUTP_DEPENDENCIES})
+    elseif(BKR_RUTP_PROFILE STREQUAL "Catch2")
+        message(STATUS "[brokkr] Using Catch2 UT profile for target '${LIB_NAME}'.")
+        _bkr_set_with_default(discover_include "${BKR_RUTP_DISCOVER_INCLUDE}" "Catch")
+        _bkr_set_with_default(discover_command "${BKR_RUTP_DISCOVER_COMMAND}" "catch_discover_tests")
+        set(dependencies Catch2::Catch2WithMain ${BKR_RUTP_DEPENDENCIES})
+    else()
+        message(FATAL_ERROR "[brokkr] UT profile \"${BKR_RUTP_PROFILE}\" for target '${LIB_NAME}' is not recognized.")
+    endif()
+
+    return(PROPAGATE discover_include discover_command dependencies)
+endfunction()
+
+
 # Create an executable target for a library's unit tests.
 #
 # This is a lower-level implementation helper function. The function
@@ -139,22 +167,16 @@ function(brokkr_add_library_unit_tests LIB_NAME)
         BKR_ADD_LIB_UT
         ""
         "PROFILE;DISCOVER_INCLUDE;DISCOVER_COMMAND"
-        "SOURCES;DEPENDENCIES;DISCOVER_EXTRA_ARGS"
+        "SOURCES;DISCOVER_EXTRA_ARGS;DEPENDENCIES"
     )
 
-    if(NOT BKR_ADD_LIB_UT_PROFILE)
-        message(VERBOSE "[brokkr] No profile selected for target '${LIB_NAME}'.")
-        set(discover_include ${BKR_ADD_LIB_UT_DISCOVER_INCLUDE})
-        set(discover_command ${BKR_ADD_LIB_UT_DISCOVER_COMMAND})
-        set(dependencies ${BKR_ADD_LIB_UT_DEPENDENCIES})
-    elseif(BKR_ADD_LIB_UT_PROFILE STREQUAL "Catch2")
-        message(STATUS "[brokkr] Using Catch2 UT profile for target '${LIB_NAME}'.")
-        _bkr_set_with_default(discover_include "${BKR_ADD_LIB_UT_DISCOVER_INCLUDE}" "Catch")
-        _bkr_set_with_default(discover_command "${BKR_ADD_LIB_UT_DISCOVER_COMMAND}" "catch_discover_tests")
-        set(dependencies Catch2::Catch2WithMain ${BKR_ADD_LIB_UT_DEPENDENCIES})
-    else()
-        message(FATAL_ERROR "[brokkr] UT profile \"$BKR_ADD_LIB_UT_PROFILE\" for target '${LIB_NAME}' is not recognized.")
-    endif()
+    _bkr_resolve_ut_profile(
+        ${LIB_NAME}
+        PROFILE ${BKR_ADD_LIB_UT_PROFILE}
+        DISCOVER_INCLUDE ${BKR_ADD_LIB_UT_DISCOVER_INCLUDE}
+        DISCOVER_COMMAND ${BKR_ADD_LIB_UT_DISCOVER_COMMAND}
+        DEPENDENCIES ${BKR_ADD_LIB_UT_DEPENDENCIES}
+    )
 
     set(ut_exec_name "${LIB_NAME}_unit-tests")
 
