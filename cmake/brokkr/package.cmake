@@ -53,7 +53,7 @@ function(_bkr_generate_targets_file OUTPUT_FILENAME)
             NAMESPACE "${PROJECT_NAME}::"
             DESTINATION lib/cmake/${PROJECT_NAME}
         )
-        set(OUTPUT_FILENAME "${PROJECT_NAME}-targets.cmake" PARENT_SCOPE)
+        set(${OUTPUT_FILENAME} "${PROJECT_NAME}-targets.cmake" PARENT_SCOPE)
     else()
         message(STATUS "[brokkr] No targets found. Skipping generation of targets file.")
     endif()
