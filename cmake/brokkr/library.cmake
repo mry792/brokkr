@@ -81,12 +81,12 @@ endfunction()
 
 
 # Generate empty source file if needed.
-function(_bkr_ensure_src OUTPUT_VARIABLE)
+function(_bkr_ensure_src OUTPUT_VARIABLE LIB_NAME UT_EXEC_NAME)
     if(NOT ARGN)
         message(
             WARNING
             "No unit test sources found for unit test executable "
-            "\"${ut_exec_name}\" of library \"${LIB_NAME}\". "
+            "\"${UT_EXEC_NAME}\" of library \"${LIB_NAME}\". "
             "Generating unit test executable only from linked "
             "dependencies."
         )
@@ -160,7 +160,12 @@ function(brokkr_add_library_unit_tests LIB_NAME)
 
     if(BKR_ADD_LIB_UT_SOURCES OR dependencies)
         # Generate empty source file if needed.
-        _bkr_ensure_src("BKR_ADD_LIB_UT_SOURCES" ${BKR_ADD_LIB_UT_SOURCES})
+        _bkr_ensure_src(
+            "BKR_ADD_LIB_UT_SOURCES"
+            ${LIB_NAME}
+            ${ut_exec_name}
+            ${BKR_ADD_LIB_UT_SOURCES}
+        )
 
         brokkr_ensure_found(TARGETS ${dependencies})
         brokkr_add_executable(
