@@ -26,8 +26,8 @@ function(_bkr_generate_extra_config OUTPUT_FILENAMES OUTPUT_TO_INSTALL)
         else()
             message(
                 SEND_ERROR
-                "Extra config must either be directly included (ends in "
-                "\".cmake\") or be templated (ends in \".cmake.in\"). The "
+                "[brokkr] Extra config must either be directly included (ends "
+                "in \".cmake\") or be templated (ends in \".cmake.in\"). The "
                 "specified extra config file \"${extra}\" is neither."
             )
         endif()
@@ -91,7 +91,7 @@ function(brokkr_package)
     if(BKR_PKG_UNPARSED_ARGUMENTS)
         message(
             FATAL_ERROR
-            "Unrecognized arguments to function `brokkr_package`:\n"
+            "[brokkr] Unrecognized arguments to function `brokkr_package`:\n"
             "${BKR_PKG_UNPARSED_ARGUMENTS}"
         )
     endif()

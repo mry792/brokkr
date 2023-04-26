@@ -68,8 +68,8 @@ function(brokkr_ensure_found)
     foreach(target_name IN LISTS loose_names)
         message(
             SEND_ERROR
-            "Dependency \"${target_name}\" is neither an existing target nor "
-            "a package-qualified name. Cannot auto-import it."
+            "[brokkr] Dependency \"${target_name}\" is neither an existing "
+            "target nor a package-qualified name. Cannot auto-import it."
         )
     endforeach()
 
