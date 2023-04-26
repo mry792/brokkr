@@ -79,7 +79,8 @@ endfunction()
 #     is imported. Files with a ".cmake.in" extension will be run through
 #     `confgure_file(@ONLY)` before being installed.
 # :type EXTRA_CONFIG: List of file paths, relative to the current lists file
-#     or absolute.
+#     or absolute. Files must have unique names as they will be installed into
+#     the same directory.
 function(brokkr_package)
     cmake_parse_arguments(
         PARSE_ARGV 0

@@ -238,20 +238,13 @@ endfunction()
 # :type LIB_NAME: String. (required)
 # :param NO_INSTALL: Suppress installation of the library target.
 # :type NO_INSTALL: Flag.
-# :param ROOT_DIRECTORY: Path of the root directory of the library.
-# :type ROOT_DIRECTORY: Absolute directory path. (optional)
 # :param LIBRARY DEPENDENCIES: Targets to link the library to.
 # :type LIBRARY DEPENDENCIES: List of target names.
 # :param LIBRARY COMPILE_FEATURES: Compile features to configure the library.
 # :type LIBRARY COMPILE_FEATURES: List of strings.
-# :param UNIT_TESTS PROFILE: Name a profile (only supports "Catch2") to auto-
-#     fill the DISCOVER_INCLUDE, DISCOVER_COMMAND, and the unit test library
-#     dependency.
-# :type UNIT_TESTS PROFILE: String.
-# :param UNIT_TESTS DISCOVER_INCLUDE: Script which provides the
-#     DISCOVER_COMMAND.
-# :type UNIT_TESTS DISCOVER_INCLUDE: Name of or path to a CMake script.
-#     (optional)
+# :param ROOT_DIRECTORY: Path of the root directory of the library.
+# :type ROOT_DIRECTORY: Absolute directory path. (optional - defaults to
+#     current source directory)
 # :param UNIT_TESTS DEPENDENCIES: Targets to link the test executable to.
 # :type UNIT_TESTS DEPENDENCIES: List of target names.
 # :param UNIT_TESTS DISCOVER_COMMAND: CMake command used to register the tests
@@ -260,6 +253,14 @@ endfunction()
 # :param UNIT_TESTS DISCOVER_EXTRA_ARGS: Extra arguments to the discover
 #     command.
 # :type UNIT_TESTS DISCOVER_EXTRA_ARGS: List of strings.
+# :param UNIT_TESTS DISCOVER_INCLUDE: Script which provides the
+#     DISCOVER_COMMAND.
+# :type UNIT_TESTS DISCOVER_INCLUDE: Name of or path to a CMake script.
+#     (optional)
+# :param UNIT_TESTS PROFILE: Name a profile (only supports "Catch2" for now)
+#     to auto-fill the DISCOVER_INCLUDE, DISCOVER_COMMAND, and the unit test
+#     library dependency.
+# :type UNIT_TESTS PROFILE: String.
 function(brokkr_library LIB_NAME)
     cmake_parse_arguments(
         PARSE_ARGV 1

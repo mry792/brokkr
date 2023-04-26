@@ -5,7 +5,7 @@
 # recent commit is not the one identified by the tag, then the resultant
 # version number will include a "tweak" component representing the number of
 # commits since the tag in question. In this case, any missing version
-# components from the will be auto-filled with "0".
+# components from the tag will be auto-filled with "0".
 #
 # This will populate the version variables normally populated by the CMake
 # `project()` command.
