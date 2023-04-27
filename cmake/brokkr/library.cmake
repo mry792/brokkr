@@ -149,9 +149,6 @@ endfunction()
 # :type DEPENDENCIES: List of target names.
 # :param DISCOVER_EXTRA_ARGS: Extra arguments to the discover command.
 # :type DISCOVER_EXTRA_ARGS: List of strings.
-#
-# All unparsed arguments will be forwarded to the `brokkr_add_executable`
-# command that creates the unit test executable target.
 function(brokkr_add_library_unit_tests LIB_NAME)
     if(NOT CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         return()
@@ -196,7 +193,6 @@ function(brokkr_add_library_unit_tests LIB_NAME)
             DEPENDENCIES
                 ${LIB_NAME}
                 ${dependencies}
-            ${BKR_ADD_LIB_UT_UNPARSED_ARGUMENTS}
         )
 
         if(discover_command)
