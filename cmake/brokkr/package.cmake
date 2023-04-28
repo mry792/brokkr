@@ -26,8 +26,8 @@ function(_bkr_generate_extra_config OUTPUT_FILENAMES OUTPUT_TO_INSTALL)
         else()
             message(
                 SEND_ERROR
-                "Extra config must either be directly included (ends in "
-                "\".cmake\") or be templated (ends in \".cmake.in\"). The "
+                "[brokkr] Extra config must either be directly included (ends "
+                "in \".cmake\") or be templated (ends in \".cmake.in\"). The "
                 "specified extra config file \"${extra}\" is neither."
             )
         endif()
@@ -53,7 +53,7 @@ function(_bkr_generate_targets_file OUTPUT_FILENAME)
             NAMESPACE "${PROJECT_NAME}::"
             DESTINATION lib/cmake/${PROJECT_NAME}
         )
-        set(OUTPUT_FILENAME "${PROJECT_NAME}-targets.cmake" PARENT_SCOPE)
+        set(${OUTPUT_FILENAME} "${PROJECT_NAME}-targets.cmake" PARENT_SCOPE)
     else()
         message(STATUS "[brokkr] No targets found. Skipping generation of targets file.")
     endif()
@@ -79,7 +79,8 @@ endfunction()
 #     is imported. Files with a ".cmake.in" extension will be run through
 #     `confgure_file(@ONLY)` before being installed.
 # :type EXTRA_CONFIG: List of file paths, relative to the current lists file
-#     or absolute.
+#     or absolute. Files must have unique names as they will be installed into
+#     the same directory.
 function(brokkr_package)
     cmake_parse_arguments(
         PARSE_ARGV 0
@@ -91,7 +92,7 @@ function(brokkr_package)
     if(BKR_PKG_UNPARSED_ARGUMENTS)
         message(
             FATAL_ERROR
-            "Unrecognized arguments to function `brokkr_package`:\n"
+            "[brokkr] Unrecognized arguments to function `brokkr_package`:\n"
             "${BKR_PKG_UNPARSED_ARGUMENTS}"
         )
     endif()

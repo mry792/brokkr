@@ -13,12 +13,19 @@ function(_bkr_package_names_from_targets OUTPUT_PACKAGES OUTPUT_LOOSE)
     set(loose_names)
 
     foreach(target_name IN LISTS ARGN)
-        string(FIND "${target_name}" "::" ns_position)
-        if("${ns_position}" EQUAL "-1")
+        string(REPLACE "::" ";" tokens ${target_name})
+        list(LENGTH tokens num_tokens)
+        if(num_tokens EQUAL 1)
             list(APPEND loose_names ${target_name})
+        elseif(num_tokens EQUAL 2)
+            list(GET tokens 0 pkg_name)
+            list(APPEND package_names ${pkg_name})
         else()
-            string(SUBSTRING "${target_name}" 0 ${ns_position} package_name)
-            list(APPEND package_names "${package_name}")
+            message(
+                FATAL_ERROR
+                "[brokkr] Cannot parse qualified target \"${target_name}\". "
+                "Too many namespace tokens."
+            )
         endif()
     endforeach()
 
@@ -68,8 +75,8 @@ function(brokkr_ensure_found)
     foreach(target_name IN LISTS loose_names)
         message(
             SEND_ERROR
-            "Dependency \"${target_name}\" is neither an existing target nor "
-            "a package-qualified name. Cannot auto-import it."
+            "[brokkr] Dependency \"${target_name}\" is neither an existing "
+            "target nor a package-qualified name. Cannot auto-import it."
         )
     endforeach()
 
@@ -92,29 +99,29 @@ endfunction()
 
 function(_bkr_get_proj_prop OUTPUT_VARIABLE PROPERTY_NAME)
     get_property(
-        project_dependencies
+        property_value
         GLOBAL
         PROPERTY "brokkr_${PROJECT_NAME}_${PROPERTY_NAME}"
     )
     set(
         ${OUTPUT_VARIABLE}
-        ${project_dependencies}
+        ${property_value}
         PARENT_SCOPE
     )
 endfunction()
 
 
 function(_bkr_append_proj_prop PROPERTY_NAME)
-    _bkr_get_proj_prop(dependencies ${PROPERTY_NAME})
+    _bkr_get_proj_prop(property_value ${PROPERTY_NAME})
 
-    list(APPEND dependencies ${ARGN})
-    list(SORT dependencies)
-    list(REMOVE_DUPLICATES dependencies)
+    list(APPEND property_value ${ARGN})
+    list(SORT property_value)
+    list(REMOVE_DUPLICATES property_value)
 
     set_property(
         GLOBAL
         PROPERTY "brokkr_${PROJECT_NAME}_${PROPERTY_NAME}"
-        ${dependencies}
+        ${property_value}
     )
 endfunction()
 

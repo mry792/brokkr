@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
 
 # Create a binary library target and populate it with all the specified
@@ -81,12 +81,12 @@ endfunction()
 
 
 # Generate empty source file if needed.
-function(_bkr_ensure_src OUTPUT_VARIABLE)
+function(_bkr_ensure_src OUTPUT_VARIABLE LIB_NAME UT_EXEC_NAME)
     if(NOT ARGN)
         message(
             WARNING
             "No unit test sources found for unit test executable "
-            "\"${ut_exec_name}\" of library \"${LIB_NAME}\". "
+            "\"${UT_EXEC_NAME}\" of library \"${LIB_NAME}\". "
             "Generating unit test executable only from linked "
             "dependencies."
         )
@@ -97,6 +97,34 @@ function(_bkr_ensure_src OUTPUT_VARIABLE)
             PARENT_SCOPE
         )
     endif()
+endfunction()
+
+
+# Resolves UT profiles by name.
+function(_bkr_resolve_ut_profile LIB_NAME)
+    cmake_parse_arguments(
+        PARSE_ARGV 1
+        BKR_RUTP
+        ""
+        "PROFILE;DISCOVER_INCLUDE;DISCOVER_COMMAND"
+        "DEPENDENCIES"
+    )
+
+    if(NOT BKR_RUTP_PROFILE)
+        message(VERBOSE "[brokkr] No profile selected for target '${LIB_NAME}'.")
+        set(discover_include ${BKR_RUTP_DISCOVER_INCLUDE})
+        set(discover_command ${BKR_RUTP_DISCOVER_COMMAND})
+        set(dependencies ${BKR_RUTP_DEPENDENCIES})
+    elseif(BKR_RUTP_PROFILE STREQUAL "Catch2")
+        message(STATUS "[brokkr] Using Catch2 UT profile for target '${LIB_NAME}'.")
+        _bkr_set_with_default(discover_include "${BKR_RUTP_DISCOVER_INCLUDE}" "Catch")
+        _bkr_set_with_default(discover_command "${BKR_RUTP_DISCOVER_COMMAND}" "catch_discover_tests")
+        set(dependencies Catch2::Catch2WithMain ${BKR_RUTP_DEPENDENCIES})
+    else()
+        message(FATAL_ERROR "[brokkr] UT profile \"${BKR_RUTP_PROFILE}\" for target '${LIB_NAME}' is not recognized.")
+    endif()
+
+    return(PROPAGATE discover_include discover_command dependencies)
 endfunction()
 
 
@@ -121,9 +149,6 @@ endfunction()
 # :type DEPENDENCIES: List of target names.
 # :param DISCOVER_EXTRA_ARGS: Extra arguments to the discover command.
 # :type DISCOVER_EXTRA_ARGS: List of strings.
-#
-# All unparsed arguments will be forwarded to the `brokkr_add_executable`
-# command that creates the unit test executable target.
 function(brokkr_add_library_unit_tests LIB_NAME)
     if(NOT CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         return()
@@ -139,28 +164,27 @@ function(brokkr_add_library_unit_tests LIB_NAME)
         BKR_ADD_LIB_UT
         ""
         "PROFILE;DISCOVER_INCLUDE;DISCOVER_COMMAND"
-        "SOURCES;DEPENDENCIES;DISCOVER_EXTRA_ARGS"
+        "SOURCES;DISCOVER_EXTRA_ARGS;DEPENDENCIES"
     )
 
-    if(NOT BKR_ADD_LIB_UT_PROFILE)
-        message(VERBOSE "[brokkr] No profile selected for target '${LIB_NAME}'.")
-        set(discover_include ${BKR_ADD_LIB_UT_DISCOVER_INCLUDE})
-        set(discover_command ${BKR_ADD_LIB_UT_DISCOVER_COMMAND})
-        set(dependencies ${BKR_ADD_LIB_UT_DEPENDENCIES})
-    elseif(BKR_ADD_LIB_UT_PROFILE STREQUAL "Catch2")
-        message(STATUS "[brokkr] Using Catch2 UT profile for target '${LIB_NAME}'.")
-        _bkr_set_with_default(discover_include "${BKR_ADD_LIB_UT_DISCOVER_INCLUDE}" "Catch")
-        _bkr_set_with_default(discover_command "${BKR_ADD_LIB_UT_DISCOVER_COMMAND}" "catch_discover_tests")
-        set(dependencies Catch2::Catch2WithMain ${BKR_ADD_LIB_UT_DEPENDENCIES})
-    else()
-        message(FATAL_ERROR "[brokkr] UT profile \"$BKR_ADD_LIB_UT_PROFILE\" for target '${LIB_NAME}' is not recognized.")
-    endif()
+    _bkr_resolve_ut_profile(
+        ${LIB_NAME}
+        PROFILE ${BKR_ADD_LIB_UT_PROFILE}
+        DISCOVER_INCLUDE ${BKR_ADD_LIB_UT_DISCOVER_INCLUDE}
+        DISCOVER_COMMAND ${BKR_ADD_LIB_UT_DISCOVER_COMMAND}
+        DEPENDENCIES ${BKR_ADD_LIB_UT_DEPENDENCIES}
+    )
 
     set(ut_exec_name "${LIB_NAME}_unit-tests")
 
     if(BKR_ADD_LIB_UT_SOURCES OR dependencies)
         # Generate empty source file if needed.
-        _bkr_ensure_src("BKR_ADD_LIB_UT_SOURCES" ${BKR_ADD_LIB_UT_SOURCES})
+        _bkr_ensure_src(
+            "BKR_ADD_LIB_UT_SOURCES"
+            ${LIB_NAME}
+            ${ut_exec_name}
+            ${BKR_ADD_LIB_UT_SOURCES}
+        )
 
         brokkr_ensure_found(TARGETS ${dependencies})
         brokkr_add_executable(
@@ -169,7 +193,6 @@ function(brokkr_add_library_unit_tests LIB_NAME)
             DEPENDENCIES
                 ${LIB_NAME}
                 ${dependencies}
-            ${BKR_ADD_LIB_UT_UNPARSED_ARGUMENTS}
         )
 
         if(discover_command)
@@ -238,20 +261,13 @@ endfunction()
 # :type LIB_NAME: String. (required)
 # :param NO_INSTALL: Suppress installation of the library target.
 # :type NO_INSTALL: Flag.
-# :param ROOT_DIRECTORY: Path of the root directory of the library.
-# :type ROOT_DIRECTORY: Absolute directory path. (optional)
 # :param LIBRARY DEPENDENCIES: Targets to link the library to.
 # :type LIBRARY DEPENDENCIES: List of target names.
 # :param LIBRARY COMPILE_FEATURES: Compile features to configure the library.
 # :type LIBRARY COMPILE_FEATURES: List of strings.
-# :param UNIT_TESTS PROFILE: Name a profile (only supports "Catch2") to auto-
-#     fill the DISCOVER_INCLUDE, DISCOVER_COMMAND, and the unit test library
-#     dependency.
-# :type UNIT_TESTS PROFILE: String.
-# :param UNIT_TESTS DISCOVER_INCLUDE: Script which provides the
-#     DISCOVER_COMMAND.
-# :type UNIT_TESTS DISCOVER_INCLUDE: Name of or path to a CMake script.
-#     (optional)
+# :param ROOT_DIRECTORY: Path of the root directory of the library.
+# :type ROOT_DIRECTORY: Absolute directory path. (optional - defaults to
+#     current source directory)
 # :param UNIT_TESTS DEPENDENCIES: Targets to link the test executable to.
 # :type UNIT_TESTS DEPENDENCIES: List of target names.
 # :param UNIT_TESTS DISCOVER_COMMAND: CMake command used to register the tests
@@ -260,6 +276,14 @@ endfunction()
 # :param UNIT_TESTS DISCOVER_EXTRA_ARGS: Extra arguments to the discover
 #     command.
 # :type UNIT_TESTS DISCOVER_EXTRA_ARGS: List of strings.
+# :param UNIT_TESTS DISCOVER_INCLUDE: Script which provides the
+#     DISCOVER_COMMAND.
+# :type UNIT_TESTS DISCOVER_INCLUDE: Name of or path to a CMake script.
+#     (optional)
+# :param UNIT_TESTS PROFILE: Name a profile (only supports "Catch2" for now)
+#     to auto-fill the DISCOVER_INCLUDE, DISCOVER_COMMAND, and the unit test
+#     library dependency.
+# :type UNIT_TESTS PROFILE: String.
 function(brokkr_library LIB_NAME)
     cmake_parse_arguments(
         PARSE_ARGV 1
