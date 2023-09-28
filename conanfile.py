@@ -4,14 +4,14 @@ from pathlib import Path
 from textwrap import dedent
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import save, update_conandata
 from conan.tools.scm import Git
 
 
 class BrokkrRecipe (ConanFile):
     name = 'brokkr'
-    # version = (computed from local repo)
+    # version = (computed from local repo or specified at package creation)
 
     author = 'M. Emery Goss <m.goss792@gmail.com>'
     url = 'https://github.com/mry792/brokkr.git'
@@ -21,36 +21,67 @@ class BrokkrRecipe (ConanFile):
     )
 
     settings = 'build_type',
-    generators = 'CMakeToolchain'
 
     @property
     def git (self):
         return Git(self, self.recipe_folder)
 
+    @property
+    def _has_git_repo (self):
+        try:
+            recipe_folder = Path(self.recipe_folder).resolve()
+            repo_root = Path(self.git.get_repo_root()).resolve();
+            return recipe_folder == repo_root
+        except Exception:
+            return False
+
     def package_id (self):
         self.info.clear()
 
     def set_version (self):
-        tag = self.git.run('describe --tags')
-        self.version = tag[1:]
+        if not self.version:
+            tag = self.git.run('describe --tags')
+            self.version = tag[1:]
 
     def export (self):
-        scm_url, scm_commit = self.git.get_url_and_commit()
+        # try:
+        if self._has_git_repo:
+            scm_url, scm_commit = self.git.get_url_and_commit()
+            update_conandata(self, {
+                'source': {
+                    'commit': scm_commit,
+                    'url': scm_url,
+                }
+            })
+            return
+
         update_conandata(self, {
-            'source': {
-                'commit': scm_commit,
-                'url': scm_url,
-            }
+            'source': { 'url': '(local)' }
         })
 
+    def export_sources (self):
+        if not self._has_git_repo:
+            self.copy('*.cmake')
+            self.copy('*.cmake.in')
+            self.copy('CMakeLists.txt')
+            self.copy('LICENSE')
+            self.copy('README.md')
+
     def source (self):
-        git = Git(self)
         source = self.conan_data['source']
-        git.clone(source['url'], target = '.')
-        git.checkout(source['commit'])
+        if source['url'] != '(local)':
+            git = Git(self)
+            git.clone(source['url'], target = '.')
+            git.checkout(source['commit'])
 
     def layout (self):
         cmake_layout(self)
+
+    def generate (self):
+        tc = CMakeToolchain(self)
+        if not self._has_git_repo:
+            tc.cache_variables['BROKKR_THIS_PROJECT_VERSION:STRING'] = self.version
+        tc.generate()
 
     def build (self):
         cmake = CMake(self)
