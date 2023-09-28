@@ -4,7 +4,7 @@ project(brokkr LANGUAGES)
 include(./cmake/brokkr/helpers.cmake)
 include(./cmake/brokkr/package.cmake)
 include(./cmake/brokkr/versioning.cmake)
-brokkr_project_version_from_git()
+brokkr_deduce_project_version()
 
 brokkr_package(
     CONFIG_TEMPLATE cmake/templates/config.cmake.in
