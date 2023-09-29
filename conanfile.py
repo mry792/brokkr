@@ -79,7 +79,7 @@ class BrokkrRecipe (ConanFile):
 
     def generate (self):
         tc = CMakeToolchain(self)
-        if not self._has_git_repo:
+        if self.conan_data['source']['url'] == '(local)':
             tc.cache_variables['BROKKR_THIS_PROJECT_VERSION:STRING'] = self.version
         tc.generate()
 
