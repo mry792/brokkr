@@ -27,6 +27,7 @@ function(brokkr_add_executable EXEC_NAME)
         "SOURCES;DEPENDENCIES;COMPILE_FEATURES"
     )
 
+    message(STATUS "[brokkr] Creating executable \"${EXEC_NAME}\".")
     add_executable(${EXEC_NAME} ${BKR_ADD_EXEC_SOURCES})
     target_link_libraries(${EXEC_NAME} PUBLIC ${BKR_ADD_EXEC_DEPENDENCIES})
     target_compile_features(${EXEC_NAME} PUBLIC ${BKR_ADD_EXEC_COMPILE_FEATURES})
