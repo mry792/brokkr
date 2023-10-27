@@ -5,7 +5,7 @@ from textwrap import dedent
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import save, update_conandata
+from conan.tools.files import copy, save, update_conandata
 from conan.tools.scm import Git
 
 
@@ -61,11 +61,11 @@ class BrokkrRecipe (ConanFile):
 
     def export_sources (self):
         if not self._has_git_repo:
-            self.copy('*.cmake')
-            self.copy('*.cmake.in')
-            self.copy('CMakeLists.txt')
-            self.copy('LICENSE')
-            self.copy('README.md')
+            copy(self, '*.cmake')
+            copy(self, '*.cmake.in')
+            copy(self, 'CMakeLists.txt')
+            copy(self, 'LICENSE')
+            copy(self, 'README.md')
 
     def source (self):
         source = self.conan_data['source']
