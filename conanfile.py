@@ -35,13 +35,18 @@ class BrokkrRecipe (ConanFile):
         except Exception:
             return False
 
-    def package_id (self):
-        self.info.clear()
-
     def set_version (self):
         if not self.version:
             tag = self.git.run('describe --tags')
             self.version = tag[1:]
+
+    @property
+    def _toolchain_file (self):
+        return Path('lib', 'cmake', self.name, 'dependent-toolchain.cmake')
+
+    ###
+    # RECIPE STEPS
+    ###
 
     def export (self):
         # try:
@@ -67,15 +72,18 @@ class BrokkrRecipe (ConanFile):
             copy(self, 'LICENSE')
             copy(self, 'README.md')
 
+    def layout (self):
+        cmake_layout(self)
+
+    def package_id (self):
+        self.info.clear()
+
     def source (self):
         source = self.conan_data['source']
         if source['url'] != '(local)':
             git = Git(self)
             git.clone(source['url'], target = '.')
             git.checkout(source['commit'])
-
-    def layout (self):
-        cmake_layout(self)
 
     def generate (self):
         tc = CMakeToolchain(self)
@@ -87,10 +95,6 @@ class BrokkrRecipe (ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-
-    @property
-    def _toolchain_file (self):
-        return Path('lib', 'cmake', self.name, 'dependent-toolchain.cmake')
 
     def package (self):
         cmake = CMake(self)
