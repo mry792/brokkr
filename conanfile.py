@@ -22,22 +22,19 @@ class BrokkrRecipe (ConanFile):
 
     settings = 'build_type',
 
-    @property
-    def git (self):
-        return Git(self, self.recipe_folder)
-
-    @property
-    def _has_git_repo (self):
+    def _has_git_repo (self, path):
         try:
-            recipe_folder = Path(self.recipe_folder).resolve()
-            repo_root = Path(self.git.get_repo_root()).resolve();
-            return recipe_folder == repo_root
+            git = Git(self, path)
+            path = Path(path).resolve()
+            repo_root = Path(git.get_repo_root()).resolve();
+            return path == repo_root
         except Exception:
             return False
 
     def set_version (self):
         if not self.version:
-            tag = self.git.run('describe --tags')
+            git = Git(self, self.recipe_folder)
+            tag = git.run('describe --tags')
             self.version = tag[1:]
 
     @property
@@ -49,9 +46,9 @@ class BrokkrRecipe (ConanFile):
     ###
 
     def export (self):
-        # try:
-        if self._has_git_repo:
-            scm_url, scm_commit = self.git.get_url_and_commit()
+        git = Git(self, self.recipe_folder)
+        if self._has_git_repo(self.recipe_folder):
+            scm_url, scm_commit = git.get_url_and_commit()
             update_conandata(self, {
                 'source': {
                     'commit': scm_commit,
@@ -65,7 +62,7 @@ class BrokkrRecipe (ConanFile):
         })
 
     def export_sources (self):
-        if not self._has_git_repo:
+        if not self._has_git_repo(self.recipe_folder):
             copy(self, '*.cmake')
             copy(self, '*.cmake.in')
             copy(self, 'CMakeLists.txt')
@@ -81,7 +78,7 @@ class BrokkrRecipe (ConanFile):
     def source (self):
         source = self.conan_data['source']
         if source['url'] != '(local)':
-            git = Git(self)
+            git = Git(self, self.source_folder)
             git.clone(source['url'], target = '.')
             git.checkout(source['commit'])
 
