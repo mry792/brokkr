@@ -63,11 +63,19 @@ class BrokkrRecipe (ConanFile):
 
     def export_sources (self):
         if not self._has_git_repo(self.recipe_folder):
-            copy(self, '*.cmake')
-            copy(self, '*.cmake.in')
-            copy(self, 'CMakeLists.txt')
-            copy(self, 'LICENSE')
-            copy(self, 'README.md')
+            def copy_src (pattern):
+                copy(
+                    self,
+                    pattern,
+                    self.recipe_folder,
+                    self.export_sources_folder,
+                )
+
+            copy_src('*.cmake')
+            copy_src('*.cmake.in')
+            copy_src('CMakeLists.txt')
+            copy_src('LICENSE')
+            copy_src('README.md')
 
     def layout (self):
         cmake_layout(self)
